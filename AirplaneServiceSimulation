@@ -1,0 +1,697 @@
+import java.util.Iterator;
+import java.util.Random;
+import java.util.Scanner;
+
+
+
+public class Main {
+	
+	public static void main(String[] args) {
+		
+		// User Input
+		// time is in minutes
+		
+		System.out.print("Enter the average coach arrival rate: ");
+		Scanner c1 = new Scanner(System.in);
+		float cAR = c1.nextFloat();
+		System.out.print("Enter the average coach service rate: ");
+		Scanner c2 = new Scanner(System.in);
+		float cSR = c2.nextFloat();
+		System.out.print("Enter the average first class arrival rate: ");
+		Scanner f1 = new Scanner(System.in);
+		float fAR = f1.nextFloat();
+		System.out.print("Enter the average first class service rate: ");
+		Scanner one = new Scanner(System.in);
+		float fSR = one.nextFloat();
+		
+		System.out.print("Enter the duration of how long the queues are open: ");
+		Scanner d = new Scanner(System.in);
+	
+		
+		int duration = d.nextInt();
+		
+		// random event - passenger arrived
+		boolean coachArrived;
+		boolean fcArrived;
+		
+		int time = 0;
+		
+		// arbitrary passenger ID number
+		int passID = 100;
+		
+		// total amount of time service stations were busy
+		
+		int totalbusyCss1 = 0;
+		int totalbusyCss2 = 0;
+		int totalbusyCss3 = 0;
+		int totalbusyCss4 = 0;
+		int totalbusyfcss1 = 0;
+		int totalbusyfcss2 = 0;
+		int totalbusyfcss3 = 0;
+		
+		// Coach Queue
+		// firstclass Queue
+		
+		ReferenceQueue <PassengerType> coachQ = new ReferenceQueue();
+		ReferenceQueue <PassengerType> firstclassQ = new ReferenceQueue();
+		
+		// Service Stations
+		
+		ServiceStationType coachSS1 = new ServiceStationType("coach", 0); 
+		ServiceStationType coachSS2 = new ServiceStationType("coach", 0);
+		ServiceStationType coachSS3 = new ServiceStationType("coach", 0); 
+		ServiceStationType coachSS4 = new ServiceStationType("coach", 0); 
+		ServiceStationType fcSS1 = new ServiceStationType("firstclass", 0); 
+		ServiceStationType fcSS2 = new ServiceStationType("firstclass", 0); 
+		ServiceStationType fcSS3 = new ServiceStationType("firstclass", 0); 
+		
+		// Passenger at each station
+		
+		PassengerType passengerC1;
+		PassengerType passengerC2;
+		PassengerType passengerC3;
+		PassengerType passengerC4;
+		PassengerType passengerF1;
+		PassengerType passengerF2;
+		PassengerType passengerF3;
+		
+		// max length in coach queue an fc queue
+		
+		int maxLengthCoach = 0;
+		int maxLengthFC = 0;
+		
+		// size of queue
+		int csize = 0;
+		int fsize = 0;
+		
+		// average waiting time variables
+		int coachWaitingTime = 0;
+		int fcWaitingTime = 0;
+		
+		// total of passengers to go through queue
+		int coachTotalPeople = 0;
+		int fcTotalPeople = 0;
+		
+		// max waiting time variables
+		int maxCoachWaitingTime = 0;
+		int maxFCWaitingTime = 0;
+		
+		// ongoing simulation variable
+		
+		boolean ongoing = true;
+		
+		while(ongoing == true) {
+			
+			// if passenger arrived
+			coachArrived = randEvent(cAR);
+			fcArrived = randEvent(fAR);
+			
+			// if passengers are still being allowed to joined the queue
+			if(time <= duration){
+				
+				// if coach passenger arrived
+				
+				if(coachArrived == true) {
+					// new passenger , put in queue
+					PassengerType p = new PassengerType(passID,randAvg(cSR), time, "coach");
+					passID++;
+					coachQ.enqueue(p);
+					csize = coachQ.size();
+					
+					// determining max length of queue
+					if(csize > maxLengthCoach )
+					{
+						maxLengthCoach = csize;
+					}
+					// total peopple to come through queue
+					coachTotalPeople = coachTotalPeople + 1;
+				
+					/*System.out.println();
+					System.out.println("Coach Passenger just joined the line");
+					System.out.println();*/
+				}
+			
+				if(fcArrived == true) {
+					
+					// same process for first class passenger
+					
+					PassengerType f = new PassengerType(passID,randAvg(cSR), time, "firstclass");
+					passID++;
+					firstclassQ.enqueue(f);
+					fsize = firstclassQ.size();
+					if(fsize > maxLengthFC )
+					{
+						maxLengthFC = fsize;
+					}
+					fcTotalPeople = fcTotalPeople + 1;
+				
+					/*System.out.println();
+					System.out.println("First Class Passenger just joined the line");
+					System.out.println();*/
+				
+				}
+			
+			}
+			
+			// if someone is in line for coach 
+			if(!coachQ.isEmpty())
+			{
+				// if service station is free 
+				if (coachSS1.getRT() == 0){
+					// first person in line go to service station
+					
+					passengerC1 = coachQ.dequeue();
+					
+					// record the amount of time they waited
+					if((time - passengerC1.getArrivalTime()) > maxCoachWaitingTime) {
+						maxCoachWaitingTime = time - passengerC1.getArrivalTime();
+					}
+					coachWaitingTime = coachWaitingTime + ( time - passengerC1.getArrivalTime());
+					//System.out.println("This passenger just joined CSS1: ");
+					//System.out.println(passengerC1.getID());
+					
+					// set the amount of time this person needs service at this service station
+					coachSS1.setTime(passengerC1.getServiceTime());
+					
+					
+				}
+				// add !coachQ.isEmpty to check if after there is still a line
+				// same process for css2,css3,css4
+				
+				if(coachSS2.getRT() == 0 && !coachQ.isEmpty()) {
+					
+					passengerC2 = coachQ.dequeue();
+					//System.out.println("This Coach passenger just joined CSS2: ");
+					//System.out.println(passengerC2.getID());
+					if((time - passengerC2.getArrivalTime()) > maxCoachWaitingTime) {
+						maxCoachWaitingTime = time - passengerC2.getArrivalTime();
+					}
+					coachWaitingTime = coachWaitingTime + ( time - passengerC2.getArrivalTime());
+					coachSS2.setTime(passengerC2.getServiceTime());
+					
+					
+				}
+				if(coachSS3.getRT() == 0 && !coachQ.isEmpty()) {
+					
+					passengerC3 = coachQ.dequeue();
+					//System.out.println("This Coach passenger just joined CSS3: ");
+					//System.out.println(passengerC3.getID());
+					if((time - passengerC3.getArrivalTime()) > maxCoachWaitingTime) {
+						maxCoachWaitingTime = time - passengerC3.getArrivalTime();
+					}
+					coachWaitingTime = coachWaitingTime + ( time - passengerC3.getArrivalTime());
+					coachSS3.setTime(passengerC3.getServiceTime());
+					
+						
+				}
+				if(coachSS4.getRT() == 0 && !coachQ.isEmpty()) {
+					
+					passengerC4 = coachQ.dequeue();
+					//System.out.println("This Coach passenger just joined CSS4: ");
+					//System.out.println(passengerC4.getID());
+					if((time - passengerC4.getArrivalTime()) > maxCoachWaitingTime) {
+						maxCoachWaitingTime = time - passengerC4.getArrivalTime();
+					}
+					coachWaitingTime = coachWaitingTime + ( time - passengerC4.getArrivalTime());
+					coachSS4.setTime(passengerC4.getServiceTime());
+					
+						
+				}
+				
+			}
+			// same process as coach for the three first class service stations
+			if(!firstclassQ.isEmpty())
+			{
+				
+				if (fcSS1.getRT() == 0){
+					passengerF1 = firstclassQ.dequeue(); 
+					//System.out.println("This First Class passenger just joined FCSS1: ");
+					//System.out.println(passengerF2.getID());
+					if((time - passengerF1.getArrivalTime()) > maxFCWaitingTime) {
+						maxFCWaitingTime = time - passengerF1.getArrivalTime();
+					}
+					fcWaitingTime = fcWaitingTime + ( time - passengerF1.getArrivalTime());
+					fcSS1.setTime(passengerF1.getServiceTime());
+					
+					
+					
+				}
+				if (fcSS2.getRT() == 0 && !firstclassQ.isEmpty()){
+					passengerF2 = firstclassQ.dequeue();
+					//System.out.println("This First Class passenger just joined FCSS2: ");
+					//System.out.println(passengeF2.getID());
+					
+					if((time - passengerF2.getArrivalTime()) > maxFCWaitingTime) {
+						maxFCWaitingTime = time - passengerF2.getArrivalTime();
+					}
+					fcWaitingTime = fcWaitingTime + ( time - passengerF2.getArrivalTime());
+					
+					fcSS2.setTime(passengerF2.getServiceTime());
+					
+					
+					
+				}
+				if (fcSS3.getRT() == 0 && !firstclassQ.isEmpty()){
+					passengerF3 = firstclassQ.dequeue();
+					//System.out.println("This First Class passenger just joined FSS3: ");
+					//System.out.println(passengerF3.getID());
+					if((time - passengerF3.getArrivalTime()) > maxFCWaitingTime) {
+						maxFCWaitingTime = time - passengerF3.getArrivalTime();
+					}
+					fcWaitingTime = fcWaitingTime + ( time - passengerF3.getArrivalTime());
+					fcSS3.setTime(passengerF3.getServiceTime());
+					
+					
+				}
+				// If people are waiting in coach queue and first class queue is empty and
+				// if theres an open Service station
+				// make sure to record accurate information for coach queue but first class service stations
+				
+				if(!coachQ.isEmpty() && firstclassQ.isEmpty())
+				{
+					if(coachSS1.getRT() != 0 && coachSS2.getRT() != 0 && coachSS2.getRT() != 0 && coachSS2.getRT() != 0) {
+						if (fcSS1.getRT() == 0){
+							
+							passengerF1 = coachQ.dequeue();
+							//System.out.println("This coach passenger just joined FSS1 : ");
+							//System.out.println(passengerF1.getID());
+							if((time - passengerF1.getArrivalTime()) > maxCoachWaitingTime) {
+								maxCoachWaitingTime = time - passengerF1.getArrivalTime();
+							}
+							coachWaitingTime = coachWaitingTime + ( time - passengerF1.getArrivalTime());
+							fcSS1.setTime(passengerF1.getServiceTime());
+							
+							
+							
+						}
+						if (fcSS2.getRT() == 0 && !firstclassQ.isEmpty()){
+							passengerF2 = coachQ.dequeue();
+							//System.out.println("This coach passenger just joined FSS2: ");
+							//System.out.println(passengerF2.getID());
+							if((time - passengerF2.getArrivalTime()) > maxCoachWaitingTime) {
+								maxCoachWaitingTime = time - passengerF2.getArrivalTime();
+							}
+							coachWaitingTime = coachWaitingTime + ( time - passengerF2.getArrivalTime());
+							fcSS2.setTime(passengerF2.getServiceTime());
+							
+							
+							
+						}
+						if (fcSS3.getRT() == 0 && !firstclassQ.isEmpty()){
+							passengerF3 = coachQ.dequeue();
+							//System.out.println("This passenger just joined FSS3: ");
+							//System.out.println(passengerF3.getID());
+							if((time - passengerF3.getArrivalTime()) > maxCoachWaitingTime) {
+								maxCoachWaitingTime = time - passengerF3.getArrivalTime();
+							}
+							coachWaitingTime = coachWaitingTime + ( time - passengerF3.getArrivalTime());
+							fcSS3.setTime(passengerF3.getServiceTime());
+							
+							
+						}
+					}
+				}
+				
+			}
+			
+			//  decreasing time and keeping amount of time service stations were busy
+				
+			if(coachSS1.getRT() >= 1) {
+				
+				totalbusyCss1 = totalbusyCss1 +1;
+				/*System.out.print("The remaining time for Css1: ");
+				System.out.println(coachSS1.getRT());*/
+				
+				coachSS1.decreaseTime();
+				
+				/*if(coachSS1.getRT() == 0 ) {
+					System.out.println("Passenger just left Css1");
+				}*/
+			}
+			if(coachSS2.getRT() >= 1) {
+
+
+				totalbusyCss2 = totalbusyCss2 +1;
+				/*System.out.print("The remaining time for Css2: ");
+				System.out.println(coachSS2.getRT());*/
+				
+				coachSS2.decreaseTime();
+				
+				/*if(coachSS2.getRT() == 0 ) {
+					System.out.println("Passenger just left Css2");
+				}*/
+			}
+			if(coachSS3.getRT() >= 1) {
+				totalbusyCss3 = totalbusyCss3 +1;
+				/*System.out.print("The remaining time for Css3: ");
+				System.out.println(coachSS3.getRT());*/
+				
+				coachSS3.decreaseTime();
+				
+				/*if(coachSS3.getRT() == 0 ) {
+					System.out.println("Passenger just left Css3");
+				}*/
+			}
+			if(coachSS4.getRT() >= 1) {
+				totalbusyCss4 = totalbusyCss4 +1;
+				/*System.out.print("The remaining time for Css4: ");
+				System.out.println(coachSS4.getRT());*/
+				coachSS4.decreaseTime();
+				
+				/*if(coachSS4.getRT() == 0 ) {
+					System.out.println("Passenger just left Css4");
+				}*/
+			}
+			if(fcSS1.getRT() >= 1) {
+				totalbusyfcss1 = totalbusyfcss1 +1;
+				/*System.out.print("The remaining time for Fss1: ");
+				System.out.println(fcSS1.getRT());*/
+				fcSS1.decreaseTime();
+				
+				/*if(fcSS1.getRT() == 0 ) {
+					System.out.println("Passenger just left Fss1");
+				}*/
+				
+			}
+			if(fcSS2.getRT() >= 1) {
+				totalbusyfcss2 = totalbusyfcss2 +1;
+				/*System.out.print("The remaining time for Fss2: ");
+				System.out.println(fcSS2.getRT());*/
+				
+				fcSS2.decreaseTime();
+				
+				/*if(fcSS2.getRT() == 0 ) {
+					System.out.println("Passenger just left Fss2");
+				}*/
+				
+			}
+			if(fcSS3.getRT() >= 1) {
+				
+				totalbusyfcss3 = totalbusyCss3 +1;
+				
+				/*System.out.print("The remaining time for Fss3: ");
+				System.out.println(fcSS3.getRT());*/
+				
+				fcSS3.decreaseTime();
+				
+				/*if(fcSS3.getRT() == 0 ) {
+					System.out.println("Passenger just left Fss3");
+				}*/
+			}
+			
+			
+			time = time + 1;
+			// queues eventually will be empty but simulation still running at service station
+			if(time > duration && coachQ.isEmpty() && firstclassQ.isEmpty() && (coachSS1.getRT() == 0) && (coachSS2.getRT() == 0) && (coachSS3.getRT() == 0) && 
+					(coachSS4.getRT() == 0) && (fcSS1.getRT() == 0) && (fcSS2.getRT() == 0) && (fcSS3.getRT() == 0)) {
+				ongoing = false;
+			}
+			
+		}
+		
+		// Outputs
+		
+		System.out.println();
+		System.out.print("Max size of coach queue: ");
+		System.out.println(maxLengthCoach);
+		System.out.print("Max size of first class queue: ");
+		System.out.println(maxLengthFC);
+		System.out.println();
+		
+		System.out.print("Average waiting time in coach queue : ");
+		System.out.println((float) coachWaitingTime / (float) coachTotalPeople);
+		
+		System.out.print("The max waiting time for the coach queue: ");
+		System.out.println(maxCoachWaitingTime);
+		System.out.println();
+		
+		
+		System.out.print("Average waiting time in first class queue : ");
+		System.out.println((float) fcWaitingTime / (float) fcTotalPeople);
+		
+		
+		System.out.print("The max waiting time for the first class queue: ");
+		System.out.println(maxFCWaitingTime);
+		System.out.println();
+		
+		System.out.println("Total Duration of the simulation: " );
+		System.out.print(time);
+		System.out.println();
+		
+		System.out.print("Percentage of time Css1 was busy " );
+		System.out.println((float) totalbusyCss1 / (float) time);
+		System.out.print("Percentage of time Css2 was busy " );
+		System.out.println((float) totalbusyCss2 / (float) time);
+		System.out.print("Percentage of time Css3 was busy " );
+		System.out.println((float) totalbusyCss3 / (float) time);
+		System.out.print("Percentage of time Css4 was busy " );
+		System.out.println((float) totalbusyCss4 / (float) time);
+		System.out.print("Percentage of time FCss1 was busy " );
+		System.out.println((float) totalbusyfcss1 / (float) time);
+		System.out.print("Percentage of time FCss2 was busy " );
+		System.out.println((float) totalbusyfcss2 / (float) time);
+		System.out.print("Percentage of time FCss3 was busy " );
+		System.out.print((float) totalbusyfcss3 / (float) time);
+		
+	}
+	
+	// boolean rand event happening with a chance of 1/n
+	
+	public static boolean randEvent(float n) {
+		
+		Random rand = new Random();
+		float num = rand.nextFloat();
+		
+		
+		return num < (1/n);
+		
+	}
+	
+	// producing a random number but will have an average of n
+	public static int randAvg(float n1) {
+		Random rand1 = new Random();
+		float num1 = rand1.nextFloat();
+		
+		float n2 = (2 * n1 -1);
+		
+		return (int) (1 +  num1*(n1));
+		
+	}
+}
+
+// Passenger Type
+// id, amount of service needed, arrival time, and type of class
+
+class PassengerType{
+	
+	public PassengerType(int ID, int s, int a, String c ) {
+		
+		this.id = ID;
+		this.service = s;
+		this.arrival = a;
+		this.classType = c;
+		
+	}
+	
+	public static void setID(int num) {
+		
+		int id = num;
+	}
+	public int getID() {
+		
+		return (id);
+	}
+	public int getServiceTime() {
+		
+		return (service);
+	}
+	public int getArrivalTime() {
+		return arrival;
+	}
+	
+	
+	private int id;
+	private int service;
+	private int arrival;
+	private String classType;
+	
+}
+// Service station type
+// records type of station and the amount of time remaining at each station
+// able to decrease time by one time unit
+class ServiceStationType{
+	public ServiceStationType(String sst, int rt) {
+		this.sstype = sst;
+		this.remainingTime = rt;
+		
+	}
+	public void setTime(int timeleft) {
+		remainingTime = timeleft;
+	}
+	public int getRT() {
+		return remainingTime;
+	}
+	public void decreaseTime() {
+		remainingTime = remainingTime - 1;
+	}
+	private String sstype;
+	private int remainingTime;
+	
+}
+interface Queue<E> extends Iterable<E> {
+    E dequeue();
+    void enqueue(E data);
+    boolean isEmpty();
+    int size();
+    E first();
+}
+// Reference Queue
+// Enqueue(), Dequeue(), isEmpty(), size (), first()
+
+class ReferenceQueue<E> implements Queue<E> {
+	
+	public ReferenceQueue() {
+		
+		// keeps size of queue
+		this.count = 0;
+	}
+
+    private class Node<T> {
+        private Node(T data) {
+            this.data = data;
+        }
+        private T data;
+        private Node<T> next;
+    }
+    // checks is queue is empty, returns true if empty, false if not
+    public boolean isEmpty() {
+    	return front == null;
+    }
+// removing front of queue
+    public E dequeue() {
+
+        E get = null;
+
+        if (front != null) {
+
+            get = front.data;
+
+            if (front == rear) {
+            	front  = rear = null;
+            }
+            else {
+            	front  = front.next;
+            }
+        }
+        count = count - 1;
+
+        return get;
+    }
+    // takes front of queue without removing element
+    public E first() {
+    	
+    	return (E) front; 
+    }
+// adding data to rear of queue
+    public void enqueue(E data) {
+
+        Node<E> add = new Node<E>(data);
+
+        if (front == null) {
+            front = rear = add;
+        }
+        else {
+            rear.next = add;
+            rear = rear.next;
+        }
+        count = count + 1;
+    }
+    // returns size of queue
+    public int size() {
+    	return count;
+    	
+    }
+
+
+    public Iterator<E> iterator() {
+
+        return new Iterator() {
+            public boolean hasNext() {
+                return curr != null;
+            }
+            public E next() {
+                E temp = curr.data;
+                curr = curr.next;
+                return temp;
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+            private Node<E> curr = front;
+        };
+    }
+
+    private Node<E> front;
+    private Node<E> rear;
+    private int count;
+}
+
+
+
+
+
+
+
+/* Sample Outputs
+
+Enter the average coach arrival rate: 2
+Enter the average coach service rate: 10
+Enter the average first class arrival rate: 5
+Enter the average first class service rate: 14
+Enter the duration of how long the queues are open: 200
+
+Max size of coach queue: 3
+Max size of first class queue: 1
+
+Average waiting time in coach queue : 0.5151515
+The max waiting time for the coach queue: 5
+
+Average waiting time in first class queue : 0.0
+The max waiting time for the first class queue: 0
+
+Total Duration of the simulation: 
+209
+Percentage of time Css1 was busy 0.8803828
+Percentage of time Css2 was busy 0.7703349
+Percentage of time Css3 was busy 0.6555024
+Percentage of time Css4 was busy 0.6028708
+Percentage of time FCss1 was busy 0.6363636
+Percentage of time FCss2 was busy 0.23923445
+Percentage of time FCss3 was busy 0.6602871
+
+Enter the average coach arrival rate: 2
+Enter the average coach service rate: 2
+Enter the average first class arrival rate: 5
+Enter the average first class service rate: 6
+Enter the duration of how long the queues are open: 300
+
+Max size of coach queue: 1
+Max size of first class queue: 1
+
+Average waiting time in coach queue : 0.0
+The max waiting time for the coach queue: 0
+
+Average waiting time in first class queue : 0.0
+The max waiting time for the first class queue: 0
+
+Total Duration of the simulation: 
+301
+Percentage of time Css1 was busy 0.58471763
+Percentage of time Css2 was busy 0.10963455
+Percentage of time Css3 was busy 0.0
+Percentage of time Css4 was busy 0.0
+Percentage of time FCss1 was busy 0.2192691
+Percentage of time FCss2 was busy 0.03322259
+Percentage of time FCss3 was busy 0.0
+
+*/ 
