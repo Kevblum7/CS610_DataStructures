@@ -24,3 +24,6 @@ The maximum length of the queue for each queue.
 The average and maximum waiting time for each queue.
 The rate of occupancy of each service station (percentage of time each station was busy).
 If you want: show the real-time evolution of the queues during the run-time simulation.
+
+
+Assignment 2 - Matrix Transitive Closure
