@@ -1,0 +1,188 @@
+public class TransClosure {
+	
+	// Using Data given for programming assignment 3 as input
+	// Created boolean matrix 1 or 0 if there was a node in that location
+	
+	// Driver. Prints Out all the graphs
+	public static void main(String[] args) {
+			
+		// No zero index
+		// rows and columns go from 1 to N and 1 to M
+			
+		
+		// Equivalence Relation
+		
+		
+		 System.out.println("Equivalence Relation");
+		 System.out.println();
+		 int Gmat[][] = new int[][] {{0,1,0,0,0,0},
+									{0,0,1,0,0,0},
+									{1,0,0,0,0,0},
+									{0,0,0,0,1,0},
+									{0,0,0,0,0,1},
+									{0,0,0,1,0,0}};
+		
+									
+									
+		 System.out.println("Graph before transitive closure.");
+		 System.out.println();
+		 displayGraph(Gmat);
+		 int Gstar[][] = createClosure(Gmat);
+		 System.out.println();
+		 System.out.println("Graph after transitive closure.");
+		 System.out.println();
+									
+		 displayGraph(Gstar);
+		
+		
+		// Finer Equivalence 
+		System.out.println();
+		System.out.println();								
+		System.out.println("Finer Equivalence");
+		System.out.println();
+		 
+		 int Gmat2[][] = new int[][] {{0,1,0,0,0,0},
+									{1,0,0,0,0,0},
+									{0,0,0,1,0,0},
+									{0,0,1,0,0,0},
+									{0,0,0,0,0,1},
+									{0,0,0,0,1,0}};						
+			
+			
+		 System.out.println("Graph before transitive closure.");
+		 System.out.println();
+		 displayGraph(Gmat2);
+		 int Gstar2[][] = createClosure(Gmat2);
+		 System.out.println();
+		 System.out.println("Graph after transitive closure.");
+		 System.out.println();
+									
+		 displayGraph(Gstar2);
+		 
+		// Total Ordering
+		System.out.println();
+		System.out.println();
+		System.out.println("Total Ordering");
+		System.out.println();				
+		   			
+		int Gmat3[][] = new int[][] {{0,1,0,0,0,0,0,0},
+	    						    {0,0,1,0,0,0,0,0},
+	    						    {0,0,0,1,0,0,0,0},
+									{0,0,0,0,1,0,0,0},
+									{0,0,0,0,0,1,0,0},
+									{0,0,0,0,0,0,1,0},
+									{0,0,0,0,0,0,0,1},
+									{0,0,0,0,0,0,0,0}};
+		 
+		 
+		 System.out.println("Graph before transitive closure.");
+		 System.out.println();
+		 displayGraph(Gmat3);
+		 int Gstar3[][] = createClosure(Gmat3);
+		 System.out.println();
+		 System.out.println("Graph after transitive closure.");
+		 System.out.println();
+									
+		 displayGraph(Gstar3);
+		 
+		 
+		// Partial Ordering 
+	    System.out.println();		
+	    System.out.println();
+		System.out.println("Partial Ordering");
+		System.out.println();
+		int Gmat4[][] = new int[][] {{0,1,0,0,0,0,0,0},
+			   						{0,0,1,0,0,0,0,0},
+								    {0,0,0,1,0,0,0,0},
+								    {0,0,0,0,0,0,0,0},
+							    	{0,0,0,0,0,1,0,0},
+								    {0,0,0,0,0,0,1,0},
+								    {0,0,0,0,0,0,0,1},
+					  			    {0,0,0,0,0,0,0,0}};
+		 
+		 
+		 System.out.println("Graph before transitive closure.");
+		 System.out.println();
+		 displayGraph(Gmat4);
+		 int Gstar4[][] = createClosure(Gmat4);
+		 System.out.println();
+		 System.out.println("Graph after transitive closure.");
+		 System.out.println();
+									
+		 displayGraph(Gstar4);
+									
+		// Universal Relation
+		System.out.println();
+		System.out.println();
+		System.out.println("Universal Relation");
+		System.out.println();
+	    int Gmat5[][] = new int[][] {{0,1,0,0,0,0,0,0},
+								    {0,0,1,0,0,0,0,0},
+								    {0,0,0,1,0,0,0,0},
+								    {0,0,0,0,1,0,0,0},
+								    {0,0,0,0,0,1,0,0},
+								    {0,0,0,0,0,0,1,0},
+								    {0,0,0,0,0,0,0,1},
+								    {1,0,0,0,0,0,0,0}};
+		
+		System.out.println("Graph before transitive closure.");
+		System.out.println();
+		displayGraph(Gmat5);
+									
+		int Gstar5[][] = createClosure(Gmat5);
+		System.out.println();
+		System.out.println("Graph after transitive closure.");
+		System.out.println();
+		
+		displayGraph(Gstar5);
+			
+		}
+	
+	    // Create Closure function takes boolean matrix G and returns G*
+	
+		public static int [][] createClosure(int mat[][]) {
+
+			
+			// First Calculate G+
+			// if original matrix already has a 1 or if there is a path from one node to the next place a 1
+			int k = 0;
+			for(int c = 0; c < mat.length; c++) {
+				for(int i = 0; i < mat.length; i++) {
+					for(int j = 0; j < mat.length; j++) {
+						if((mat[i][j] != 0) || ((mat[i][c] !=0) && (mat[c][j]!=0))) {
+							k = 1;
+						}
+						else {
+							k = 0;
+						}
+						
+						mat[i][j] = k;
+					}
+				}
+			}
+			
+			// Calculating G* by creating union between G+ and I
+			// Making diagonal 1
+			for(int u = 0; u < mat.length; u++){
+		        for(int v = 0; v < mat.length; v++){
+		             if (u == v)
+		                 mat[u][v] = 1;
+		            }
+		        }
+			return mat;
+			
+		       
+		}
+		public static void displayGraph(int matrix[][]) {
+			
+			for(int a = 0; a < matrix.length; a++){
+		        for(int b = 0; b < matrix.length; b++){
+		        	System.out.print( matrix[a][b] + " ");
+		          }
+		          System.out.println();
+		        }
+		}
+		
+
+
+}
