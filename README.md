@@ -1,3 +1,5 @@
+Assignment 1 - Airplane Service Simulation
+
 Instructions
 Implement a queue data type. Then use it to simulate the evolution of waiting queues, by invoking several instances of the queue data type.
 
